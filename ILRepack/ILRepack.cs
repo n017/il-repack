@@ -25,6 +25,7 @@ using Mono.Cecil.PE;
 using Mono.Unix.Native;
 using ILRepacking.Mixins;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Diagnostics;
 
 namespace ILRepacking
 {
@@ -70,6 +71,9 @@ namespace ILRepacking
         {
             Options = options;
             Logger = logger;
+
+            logger.ShouldLogVerbose = options.LogVerbose;
+
             _repackImporter = new RepackImporter(Logger, Options, this, _aspOffsets);
         }
 
@@ -253,6 +257,8 @@ namespace ILRepacking
         /// </summary>
         public void Repack()
         {
+            var timer = new Stopwatch();
+            timer.Start();
             Options.Validate();
             PrintRepackVersion();
             _reflectionHelper = new ReflectionHelper(this);
@@ -359,6 +365,7 @@ namespace ILRepacking
             ConfigMerger.Process(this);
             if (Options.XmlDocumentation)
                 DocumentationMerger.Process(this);
+            Logger.Info($"Finished in {timer.Elapsed}");
         }
 
         private void ResolveSearchDirectories()
